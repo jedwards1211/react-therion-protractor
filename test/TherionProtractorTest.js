@@ -29,7 +29,7 @@ describe('TherionProtractor', () => {
     expect(svg.prop('width')).to.equal('4.25in')
     expect(svg.prop('height')).to.equal('2.25in')
     expect(svg.prop('preserveAspectRatio')).to.equal('xMidYMid meet')
-    expect(svg.prop('viewBox')).to.equal('-2.125 -2.125 4.25 2.25')
+    expect(svg.prop('viewBox')).to.equal('-2.125 0 4.25 2.25')
   })
 })
 
