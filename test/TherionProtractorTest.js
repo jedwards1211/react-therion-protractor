@@ -16,17 +16,20 @@ describe('TherionProtractor', () => {
           unit="in"
           radius={40}
           strokeWidths={{
-            minorRadius: 0.01
+            major: 0.3,
+            minor: 0.125,
+            tertiary: 0.05,
+            quaternary: 0.02,
           }}
       />
     )
 
     const svg = comp.find('svg')
 
-    expect(svg.prop('width')).to.equal('4.02in')
-    expect(svg.prop('height')).to.equal('2.01in')
+    expect(svg.prop('width')).to.equal('4.25in')
+    expect(svg.prop('height')).to.equal('2.25in')
     expect(svg.prop('preserveAspectRatio')).to.equal('xMidYMid meet')
-    expect(svg.prop('viewBox')).to.equal('-2.01 0 4.02 2.01')
+    expect(svg.prop('viewBox')).to.equal('-2.125 -2.125 4.25 2.25')
   })
 })
 

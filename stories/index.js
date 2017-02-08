@@ -12,7 +12,10 @@ storiesOf('TherionProtractor', module)
         radius={40}
         minTickSpacing={0.1}
         strokeWidths={{
-          minorRadius: 0.01
+          major: 0.03,
+          minor: 0.01,
+          tertiary: 0.005,
+          quaternary: 0.002,
         }}
     />
   ))
@@ -23,7 +26,10 @@ storiesOf('TherionProtractor', module)
         radius={40}
         minTickSpacing={0.1}
         strokeWidths={{
-          minorRadius: 0.01
+          major: 0.03,
+          minor: 0.01,
+          tertiary: 0.005,
+          quaternary: 0.002,
         }}
     />
   ))
@@ -34,7 +40,10 @@ storiesOf('TherionProtractor', module)
         radius={35}
         minTickSpacing={0.1}
         strokeWidths={{
-          minorRadius: 0.01
+          major: 0.03,
+          minor: 0.01,
+          tertiary: 0.005,
+          quaternary: 0.002,
         }}
     />
   ))

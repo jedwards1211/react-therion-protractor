@@ -30,7 +30,10 @@ export type InputProps = {
    */
   radius: number,
   strokeWidths: {
-    minorRadius: number,
+    major: number,
+    minor: number,
+    tertiary: number,
+    quaternary: number,
   },
 }
 
@@ -45,21 +48,129 @@ export type Props = InputProps & {
 const TherionProtractor = ({
   unit, scale, minTickSpacing, radius, sheet: {classes}, strokeWidths,
 }: Props): React.Element<any> => {
-  const paperRadius = radius / scale + strokeWidths.minorRadius
+  const paperRadius = radius / scale
+  const height = paperRadius + strokeWidths.minor
+  const minorSpacing = 1 / 5
+  const tertiarySpacing = minorSpacing / 2
 
   return (
     <svg
-        width={`${paperRadius * 2}${unit}`}
-        height={`${paperRadius}${unit}`}
-        viewBox={`${-paperRadius} 0 ${paperRadius * 2} ${paperRadius}`}
+        width={`${height * 2}${unit}`}
+        height={`${height + strokeWidths.minor}${unit}`}
+        viewBox={`${-height} ${-height} ${height * 2} ${height + strokeWidths.minor}`}
         preserveAspectRatio="xMidYMid meet"
     >
+      <defs>
+        <clipPath id="outline">
+          <path
+              d={`M ${-paperRadius} 0 A ${paperRadius} ${paperRadius} 0 0 1 ${paperRadius} 0 Z`}
+              stroke="none"
+              fill="none"
+          />
+        </clipPath>
+        <clipPath id="spoke-clip">
+          <path
+              d={`M ${-paperRadius} 0 A ${paperRadius} ${paperRadius} 0 0 1 ${paperRadius} 0 L ${minorSpacing} 0 A ${minorSpacing} ${minorSpacing} 0 0 0 ${-minorSpacing} 0 Z`}
+              stroke="none"
+              fill="none"
+          />
+        </clipPath>
+      </defs>
       <path
-          d={range(1, radius / scale + 0.5, 1).map(
-            radius => `M ${-radius} ${0} A ${radius} ${radius} 0 0 0 ${radius} 0`
+          d={`M 0 0 L 0 ${-paperRadius}`}
+          stroke="black"
+          strokeWidth={strokeWidths.tertiary}
+          fill="none"
+      />
+      <path
+          d={range(tertiarySpacing, paperRadius, minorSpacing).map(
+            radius => `M ${-radius} 0 L ${-radius} ${-paperRadius} M ${radius} 0 L ${radius} ${-paperRadius}`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.minorRadius}
+          strokeWidth={strokeWidths.quaternary}
+          fill="none"
+          clipPath="url(#outline)"
+      />
+      <path
+          d={range(tertiarySpacing, paperRadius, minorSpacing).map(
+            radius => `M ${-radius} 0 L ${-radius} ${-tertiarySpacing} M ${radius} 0 L ${radius} ${-tertiarySpacing}`
+          ).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.tertiary}
+          fill="none"
+          clipPath="url(#outline)"
+      />
+      <path
+          d={range(minorSpacing, paperRadius, minorSpacing).map(
+            radius => `M ${-radius} 0 L ${-radius} ${-paperRadius} M ${radius} 0 L ${radius} ${-paperRadius}`
+          ).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.tertiary}
+          fill="none"
+          clipPath="url(#outline)"
+      />
+      <path
+          d={range(minorSpacing, paperRadius, minorSpacing).map(
+            radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 1 ${radius} 0`
+          ).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.minor}
+          fill="none"
+      />
+      <path
+          d={range(1, paperRadius, 1).map(
+            radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 1 ${radius} 0`
+          ).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.major}
+          fill="none"
+      />
+      <path
+          d={range(1, 180, 1).map((angle: number): string => {
+            const s = -Math.sin(angle * Math.PI / 180)
+            const c = Math.cos(angle * Math.PI / 180)
+            const ir = paperRadius - tertiarySpacing / 2
+            return `M ${ir * c} ${ir * s} L ${paperRadius * c} ${paperRadius * s}`
+          }).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.tertiary}
+          fill="none"
+          clipPath="url(#spoke-clip)"
+      />
+      <path
+          d={range(5, 180, 10).map((angle: number): string => {
+            const s = -Math.sin(angle * Math.PI / 180)
+            const c = Math.cos(angle * Math.PI / 180)
+            const ir = paperRadius - tertiarySpacing
+            return `M ${ir * c} ${ir * s} L ${paperRadius * c} ${paperRadius * s}`
+          }).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.minor}
+          fill="none"
+          clipPath="url(#spoke-clip)"
+      />
+      <path
+          d={range(10, 180, 10).map(
+            angle => `M 0 0 L ${paperRadius * Math.cos(angle * Math.PI / 180)} ${paperRadius * -Math.sin(angle * Math.PI / 180)}`
+          ).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.minor}
+          fill="none"
+          clipPath="url(#spoke-clip)"
+      />
+      <path
+          d={range(30, 180, 30).map(
+            angle => `M 0 0 L ${paperRadius * Math.cos(angle * Math.PI / 180)} ${paperRadius * -Math.sin(angle * Math.PI / 180)}`
+          ).join(' ')}
+          stroke="black"
+          strokeWidth={strokeWidths.major}
+          fill="none"
+          clipPath="url(#spoke-clip)"
+      />
+      <path
+          d={`M ${-paperRadius} 0 A ${paperRadius} ${paperRadius} 0 0 1 ${paperRadius} 0 Z`}
+          stroke="black"
+          strokeWidth={strokeWidths.minor}
           fill="none"
       />
     </svg>
