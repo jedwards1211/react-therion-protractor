@@ -12,7 +12,8 @@ describe('TherionProtractor', () => {
     const comp = mount(
       <TherionProtractor
           scale={20}
-          minTickSpacing={0.1}
+          minTertiaryTickSpacing={0.1}
+          minMinorTickSpacing={0.2}
           unit="in"
           radius={40}
           strokeWidths={{

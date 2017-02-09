@@ -4,6 +4,8 @@ import React from 'react'
 import injectSheet from 'react-jss'
 import range from 'lodash.range'
 
+import {niceCeiling, largerNiceIncrement, modFloor} from './GridMath'
+
 type OutlinedTextProps = {
   transform?: string,
   children?: string,
@@ -38,7 +40,7 @@ const styles = {
   azimuthText: {
     fontFamily: 'arial',
     textAnchor: 'middle',
-    dominantBaseline: 'alphabetic',
+    dominantBaseline: 'middle',
   },
   inclinationText: {
     fontFamily: 'arial',
@@ -52,21 +54,11 @@ export type InputProps = {
    * The unit for protractor sizing (not the length unit being used to survey the cave)
    */
   unit: 'in' | 'cm',
-  /**
-   * Ratio between actual units and paper units.  For example, if the `scale` is 20 and the `unit` is 'in', the
-   * protractor scale will be 1 in = 20 ft (or 20 m, since the ruler isn't labeled with units)
-   */
-  scale: number,
-  /**
-   * The minimum spacing between ticks on the protractor, in `unit`.  For example, if `unit` is 'in' and
-   * `minTickSpacing` is 0.1, ticks will be at least 0.1 in apart.
-   */
-  minTickSpacing: number,
-  /**
-   * Radius in *actual* units, not paper units.  For instance, if the `unit` is 'in', the `scale` is 10, and the
-   * `radius` is 40, the protractor will have a radius of 4 inches, and the outer edge of the protractor will
-   * represent an actual distance of 40 actual units.
-   */
+  angleUnit: 'deg' | 'grad',
+  paperScale: number,
+  worldScale: number,
+  minTertiaryTickSpacing: number,
+  minMinorTickSpacing: number,
   radius: number,
   strokeWidths: {
     major: number,
@@ -87,16 +79,34 @@ export type Props = InputProps & {
 }
 
 const TherionProtractor = ({
-  unit, scale, minTickSpacing, radius, sheet: {classes}, strokeWidths,
+  unit, angleUnit, paperScale, worldScale, minMinorTickSpacing, minTertiaryTickSpacing, radius, sheet: {classes}, strokeWidths,
 }: Props): React.Element<any> => {
-  const paperRadius = radius / scale
+  const paperRadius = radius * paperScale / worldScale
   const height = paperRadius + strokeWidths.minor
-  const minorSpacing = 1 / 5
-  const tertiarySpacing = minorSpacing / 2
-  const minorLengthTextSize = minorSpacing * 0.5
-  const majorLengthTextSize = minorSpacing * 0.7
-  const azimuthTextSize = minorSpacing * 0.75
-  const inclinationTextSize = minorSpacing * 0.5
+  const tertiaryIncrement = niceCeiling(minTertiaryTickSpacing * worldScale / paperScale)
+  const tertiarySpacing = tertiaryIncrement * paperScale / worldScale
+  const minorIncrement = niceCeiling(minMinorTickSpacing * worldScale / paperScale)
+  const minorSpacing = minorIncrement * paperScale / worldScale
+  const majorIncrement = largerNiceIncrement(minorIncrement)
+  const majorSpacing = majorIncrement * paperScale / worldScale
+  const majorLengthTextSize = Math.min(minorSpacing, paperRadius * 0.06)
+  const minorLengthTextSize = Math.min(minorSpacing * 0.6, majorLengthTextSize * 0.8)
+  const azimuthTextSize = Math.min(minorSpacing * 0.8, paperRadius * 0.06)
+  const inclinationTextSize = Math.min(minorSpacing * 0.6, paperRadius * 0.045)
+  const inclinationLabelRadius = Math.min(modFloor(paperRadius / 2, majorSpacing) + majorSpacing / 2, paperRadius - minorSpacing * 3.5)
+
+  const smallestTickSize = minorSpacing / 4
+
+  const wholeTurn = angleUnit === 'grad' ? 400 : 360
+  const halfTurn = wholeTurn / 2
+  const quarterTurn = wholeTurn / 4
+
+  const majorTurn = angleUnit === 'grad' ? 50 : 30
+
+  const toDegrees = angle => angle * 180 / halfTurn
+
+  const sin = angle => Math.sin(angle * Math.PI / halfTurn)
+  const cos = angle => Math.cos(angle * Math.PI / halfTurn)
 
   return (
     <svg
@@ -129,19 +139,21 @@ const TherionProtractor = ({
           fill="none"
       />
       {/* tertiary verticals */}
+      {/*
       <path
-          d={range(tertiarySpacing, paperRadius, minorSpacing).map(
+        d={range(tertiarySpacing, paperRadius, tertiarySpacing).map(
             radius => `M ${-radius} 0 L ${-radius} ${paperRadius} M ${radius} 0 L ${radius} ${paperRadius}`
           ).join(' ')}
-          stroke="black"
-          strokeWidth={strokeWidths.quaternary}
-          fill="none"
-          clipPath="url(#outline)"
+        stroke="black"
+        strokeWidth={strokeWidths.quaternary}
+        fill="none"
+        clipPath="url(#outline)"
       />
+      */}
       {/* tertiary length ticks */}
       <path
-          d={range(tertiarySpacing, paperRadius, minorSpacing).map(
-            radius => `M ${-radius} 0 L ${-radius} ${tertiarySpacing} M ${radius} 0 L ${radius} ${tertiarySpacing}`
+          d={range(tertiarySpacing, paperRadius, tertiarySpacing).map(
+            radius => `M ${-radius} 0 L ${-radius} ${smallestTickSize} M ${radius} 0 L ${radius} ${smallestTickSize}`
           ).join(' ')}
           stroke="black"
           strokeWidth={strokeWidths.tertiary}
@@ -169,7 +181,7 @@ const TherionProtractor = ({
       />
       {/* major arcs */}
       <path
-          d={range(1, paperRadius, 1).map(
+          d={range(majorSpacing, paperRadius, majorSpacing).map(
             radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 0 ${radius} 0`
           ).join(' ')}
           stroke="black"
@@ -178,10 +190,10 @@ const TherionProtractor = ({
       />
       {/* 1-degree ticks */}
       <path
-          d={range(1, 180, 1).map((angle: number): string => {
-            const s = Math.sin(angle * Math.PI / 180)
-            const c = Math.cos(angle * Math.PI / 180)
-            const ir = paperRadius - tertiarySpacing / 2
+          d={range(1, halfTurn, 1).map((angle: number): string => {
+            const s = sin(angle)
+            const c = cos(angle)
+            const ir = paperRadius - smallestTickSize
             return `M ${ir * c} ${ir * s} L ${paperRadius * c} ${paperRadius * s}`
           }).join(' ')}
           stroke="black"
@@ -191,10 +203,10 @@ const TherionProtractor = ({
       />
       {/* 5 degree ticks */}
       <path
-          d={range(5, 180, 10).map((angle: number): string => {
-            const s = Math.sin(angle * Math.PI / 180)
-            const c = Math.cos(angle * Math.PI / 180)
-            const ir = paperRadius - tertiarySpacing
+          d={range(5, halfTurn, 10).map((angle: number): string => {
+            const s = sin(angle)
+            const c = cos(angle)
+            const ir = paperRadius - smallestTickSize * 2
             return `M ${ir * c} ${ir * s} L ${paperRadius * c} ${paperRadius * s}`
           }).join(' ')}
           stroke="black"
@@ -204,90 +216,33 @@ const TherionProtractor = ({
       />
       {/* 10-degree spokes */}
       <path
-          d={range(10, 180, 10).map(
-            angle => `M 0 0 L ${paperRadius * Math.cos(angle * Math.PI / 180)} ${paperRadius * Math.sin(angle * Math.PI / 180)}`
+          d={range(10, halfTurn, 10).map(
+            angle => `M 0 0 L ${paperRadius * cos(angle)} ${paperRadius * sin(angle)}`
           ).join(' ')}
           stroke="black"
           strokeWidth={strokeWidths.minor}
           fill="none"
           clipPath="url(#spoke-clip)"
       />
-      {/* 30-degree spokes */}
+      {/* major spokes */}
       <path
-          d={range(30, 180, 30).map(
-            angle => `M 0 0 L ${paperRadius * Math.cos(angle * Math.PI / 180)} ${paperRadius * Math.sin(angle * Math.PI / 180)}`
+          d={range(majorTurn, halfTurn, majorTurn).map(
+            angle => `M 0 0 L ${paperRadius * cos(angle)} ${paperRadius * sin(angle)}`
           ).join(' ')}
           stroke="black"
           strokeWidth={strokeWidths.major}
           fill="none"
           clipPath="url(#spoke-clip)"
       />
-
-      {/* minor lengths on left side */}
-      <g>
-      {range(minorSpacing, paperRadius, minorSpacing).map(radius =>
-        <OutlinedText
-            key={radius}
-            className={classes.lengthText}
-            x={-radius}
-            y={minorSpacing}
-            fontSize={minorLengthTextSize}
-        >
-          {(radius * scale).toFixed(0)}
-        </OutlinedText>
-      )}
-      </g>
-      {/* minor lengths on left side */}
-      <g>
-      {range(minorSpacing, paperRadius, minorSpacing).map(radius =>
-        <OutlinedText
-            key={radius}
-            className={classes.lengthText}
-            x={radius}
-            y={minorSpacing}
-            fontSize={minorLengthTextSize}
-        >
-          {(radius * scale).toFixed(0)}
-        </OutlinedText>
-      )}
-      </g>
-      {/* major lengths on left side */}
-      <g>
-      {range(1, paperRadius, 1).map(radius =>
-        <OutlinedText
-            key={radius}
-            className={classes.lengthText}
-            x={-radius}
-            y={minorSpacing}
-            fontSize={majorLengthTextSize}
-        >
-          {(radius * scale).toFixed(0)}
-        </OutlinedText>
-      )}
-      </g>
-      {/* major lengths on left side */}
-      <g>
-      {range(1, paperRadius, 1).map(radius =>
-        <OutlinedText
-            key={radius}
-            className={classes.lengthText}
-            x={radius}
-            y={minorSpacing}
-            fontSize={majorLengthTextSize}
-        >
-          {(radius * scale).toFixed(0)}
-        </OutlinedText>
-      )}
-      </g>
       {/* inclinations on left side */}
       <g>
-      {range(10, 90, 10).map(angle =>
+      {range(10, quarterTurn, 10).map(angle =>
         <OutlinedText
             key={angle}
-            transform={`rotate(${90 - angle} 0,0)`}
+            transform={`rotate(${toDegrees(quarterTurn - angle)} 0,0)`}
             className={classes.inclinationText}
             x={0}
-            y={1.5}
+            y={inclinationLabelRadius}
             fontSize={inclinationTextSize}
         >
           {angle.toFixed(0)}
@@ -296,28 +251,84 @@ const TherionProtractor = ({
       </g>
       {/* inclinations on right side */}
       <g>
-      {range(10, 90, 10).map(angle =>
+      {range(10, quarterTurn, 10).map(angle =>
         <OutlinedText
             key={angle}
-            transform={`rotate(${angle - 90} 0,0)`}
+            transform={`rotate(${toDegrees(angle - quarterTurn)} 0,0)`}
             className={classes.inclinationText}
             x={0}
-            y={1.5}
+            y={inclinationLabelRadius}
             fontSize={inclinationTextSize}
         >
           {angle.toFixed(0)}
         </OutlinedText>
       )}
       </g>
+      {/* minor lengths on left side */}
+      <g>
+      {range(minorSpacing, paperRadius, minorSpacing).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={-radius}
+            y={smallestTickSize + minorLengthTextSize}
+            fontSize={minorLengthTextSize}
+        >
+          {(radius * worldScale / paperScale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* minor lengths on left side */}
+      <g>
+      {range(minorSpacing, paperRadius, minorSpacing).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={radius}
+            y={smallestTickSize + minorLengthTextSize}
+            fontSize={minorLengthTextSize}
+        >
+          {(radius * worldScale / paperScale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* major lengths on left side */}
+      <g>
+      {range(majorSpacing, paperRadius, majorSpacing).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={-radius}
+            y={smallestTickSize + majorLengthTextSize * 0.9}
+            fontSize={majorLengthTextSize}
+        >
+          {(radius * worldScale / paperScale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* major lengths on left side */}
+      <g>
+      {range(majorSpacing, paperRadius, majorSpacing).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={radius}
+            y={smallestTickSize + majorLengthTextSize * 0.9}
+            fontSize={majorLengthTextSize}
+        >
+          {(radius * worldScale / paperScale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
       {/* azimuths 10 - 180 */}
       <g>
-        {range(10, 180, 10).map(angle =>
+        {range(10, halfTurn, 10).map(angle =>
           <OutlinedText
               key={angle}
-              transform={`rotate(${90 - angle} 0,0)`}
+              transform={`rotate(${toDegrees(quarterTurn - angle)} 0,0)`}
               className={classes.azimuthText}
               x={0}
-              y={paperRadius - tertiarySpacing}
+              y={paperRadius - minorSpacing / 2}
               fontSize={azimuthTextSize}
           >
             {angle.toFixed(0)}
@@ -326,13 +337,13 @@ const TherionProtractor = ({
       </g>
       {/* azimuths 190 - 360 */}
       <g>
-        {range(190, 360, 10).map(angle =>
+        {range(halfTurn + 10, wholeTurn, 10).map(angle =>
           <OutlinedText
               key={angle}
-              transform={`rotate(${270 - angle} 0,0)`}
+              transform={`rotate(${toDegrees(quarterTurn * 3 - angle)} 0,0)`}
               className={classes.azimuthText}
               x={0}
-              y={paperRadius - tertiarySpacing - minorSpacing}
+              y={paperRadius - minorSpacing * 1.5}
               fontSize={azimuthTextSize}
           >
             {angle.toFixed(0)}
