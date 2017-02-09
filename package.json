@@ -1,7 +1,7 @@
 {
-  "name": "cave-survey-protractors",
+  "name": "react-therion-protractor",
   "version": "5.0.0",
-  "description": "customizable SVG cave survey protractors",
+  "description": "customizable SVG therion protractor in React",
   "main": "lib/index.js",
   "scripts": {
     "lint": "eslint src test stories",
@@ -40,20 +40,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jedwards1211/cave-survey-protractors.git"
+    "url": "git+https://github.com/jedwards1211/react-therion-protractor.git"
   },
   "keywords": [
     "caving",
     "survey",
     "cave survey",
+    "therion",
     "protractor"
   ],
   "author": "Andy Edwards",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jedwards1211/cave-survey-protractors/issues"
+    "url": "https://github.com/jedwards1211/react-therion-protractor/issues"
   },
-  "homepage": "https://github.com/jedwards1211/cave-survey-protractors#readme",
+  "homepage": "https://github.com/jedwards1211/react-therion-protractor#readme",
   "devDependencies": {
     "@jedwards1211/eslint-config-flow": "^1.0.0",
     "@jedwards1211/eslint-config-react": "^1.0.1",
