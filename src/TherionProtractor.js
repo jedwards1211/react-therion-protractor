@@ -4,8 +4,47 @@ import React from 'react'
 import injectSheet from 'react-jss'
 import range from 'lodash.range'
 
-const styles = {
+type OutlinedTextProps = {
+  transform?: string,
+  children?: string,
+  fontSize: number,
+}
 
+const OutlinedText = ({transform, children, fontSize, ...props}: OutlinedTextProps) => (
+  <g transform={transform}>
+    <text
+        {...props}
+        fontSize={fontSize}
+        stroke="white"
+        strokeWidth={fontSize * 0.2}
+    >
+      {children}
+    </text>
+    <text
+        {...props}
+        fontSize={fontSize}
+    >
+      {children}
+    </text>
+  </g>
+)
+
+const styles = {
+  lengthText: {
+    fontFamily: 'arial',
+    textAnchor: 'middle',
+    dominantBaseline: 'hanging',
+  },
+  azimuthText: {
+    fontFamily: 'arial',
+    textAnchor: 'middle',
+    dominantBaseline: 'alphabetic',
+  },
+  inclinationText: {
+    fontFamily: 'arial',
+    textAnchor: 'middle',
+    dominantBaseline: 'middle',
+  },
 }
 
 export type InputProps = {
@@ -40,7 +79,9 @@ export type InputProps = {
 export type Props = InputProps & {
   sheet: {
     classes: {
-
+      lengthText: string,
+      azimuthText: string,
+      inclinationText: string,
     },
   },
 }
@@ -52,6 +93,10 @@ const TherionProtractor = ({
   const height = paperRadius + strokeWidths.minor
   const minorSpacing = 1 / 5
   const tertiarySpacing = minorSpacing / 2
+  const minorLengthTextSize = minorSpacing * 0.5
+  const majorLengthTextSize = minorSpacing * 0.7
+  const azimuthTextSize = minorSpacing * 0.75
+  const inclinationTextSize = minorSpacing * 0.5
 
   return (
     <svg
@@ -76,12 +121,14 @@ const TherionProtractor = ({
           />
         </clipPath>
       </defs>
+      {/* center vertical */}
       <path
           d={`M 0 0 L 0 ${paperRadius}`}
           stroke="black"
           strokeWidth={strokeWidths.tertiary}
           fill="none"
       />
+      {/* tertiary verticals */}
       <path
           d={range(tertiarySpacing, paperRadius, minorSpacing).map(
             radius => `M ${-radius} 0 L ${-radius} ${paperRadius} M ${radius} 0 L ${radius} ${paperRadius}`
@@ -91,6 +138,7 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#outline)"
       />
+      {/* tertiary length ticks */}
       <path
           d={range(tertiarySpacing, paperRadius, minorSpacing).map(
             radius => `M ${-radius} 0 L ${-radius} ${tertiarySpacing} M ${radius} 0 L ${radius} ${tertiarySpacing}`
@@ -100,6 +148,7 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#outline)"
       />
+      {/* minor verticals */}
       <path
           d={range(minorSpacing, paperRadius, minorSpacing).map(
             radius => `M ${-radius} 0 L ${-radius} ${paperRadius} M ${radius} 0 L ${radius} ${paperRadius}`
@@ -109,6 +158,7 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#outline)"
       />
+      {/* minor arcs */}
       <path
           d={range(minorSpacing, paperRadius, minorSpacing).map(
             radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 0 ${radius} 0`
@@ -117,6 +167,7 @@ const TherionProtractor = ({
           strokeWidth={strokeWidths.minor}
           fill="none"
       />
+      {/* major arcs */}
       <path
           d={range(1, paperRadius, 1).map(
             radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 0 ${radius} 0`
@@ -125,6 +176,7 @@ const TherionProtractor = ({
           strokeWidth={strokeWidths.major}
           fill="none"
       />
+      {/* 1-degree ticks */}
       <path
           d={range(1, 180, 1).map((angle: number): string => {
             const s = Math.sin(angle * Math.PI / 180)
@@ -137,6 +189,7 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#spoke-clip)"
       />
+      {/* 5 degree ticks */}
       <path
           d={range(5, 180, 10).map((angle: number): string => {
             const s = Math.sin(angle * Math.PI / 180)
@@ -149,6 +202,7 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#spoke-clip)"
       />
+      {/* 10-degree spokes */}
       <path
           d={range(10, 180, 10).map(
             angle => `M 0 0 L ${paperRadius * Math.cos(angle * Math.PI / 180)} ${paperRadius * Math.sin(angle * Math.PI / 180)}`
@@ -158,6 +212,7 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#spoke-clip)"
       />
+      {/* 30-degree spokes */}
       <path
           d={range(30, 180, 30).map(
             angle => `M 0 0 L ${paperRadius * Math.cos(angle * Math.PI / 180)} ${paperRadius * Math.sin(angle * Math.PI / 180)}`
@@ -167,6 +222,124 @@ const TherionProtractor = ({
           fill="none"
           clipPath="url(#spoke-clip)"
       />
+
+      {/* minor lengths on left side */}
+      <g>
+      {range(minorSpacing, paperRadius, minorSpacing).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={-radius}
+            y={minorSpacing}
+            fontSize={minorLengthTextSize}
+        >
+          {(radius * scale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* minor lengths on left side */}
+      <g>
+      {range(minorSpacing, paperRadius, minorSpacing).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={radius}
+            y={minorSpacing}
+            fontSize={minorLengthTextSize}
+        >
+          {(radius * scale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* major lengths on left side */}
+      <g>
+      {range(1, paperRadius, 1).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={-radius}
+            y={minorSpacing}
+            fontSize={majorLengthTextSize}
+        >
+          {(radius * scale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* major lengths on left side */}
+      <g>
+      {range(1, paperRadius, 1).map(radius =>
+        <OutlinedText
+            key={radius}
+            className={classes.lengthText}
+            x={radius}
+            y={minorSpacing}
+            fontSize={majorLengthTextSize}
+        >
+          {(radius * scale).toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* inclinations on left side */}
+      <g>
+      {range(10, 90, 10).map(angle =>
+        <OutlinedText
+            key={angle}
+            transform={`rotate(${90 - angle} 0,0)`}
+            className={classes.inclinationText}
+            x={0}
+            y={1.5}
+            fontSize={inclinationTextSize}
+        >
+          {angle.toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* inclinations on right side */}
+      <g>
+      {range(10, 90, 10).map(angle =>
+        <OutlinedText
+            key={angle}
+            transform={`rotate(${angle - 90} 0,0)`}
+            className={classes.inclinationText}
+            x={0}
+            y={1.5}
+            fontSize={inclinationTextSize}
+        >
+          {angle.toFixed(0)}
+        </OutlinedText>
+      )}
+      </g>
+      {/* azimuths 10 - 180 */}
+      <g>
+        {range(10, 180, 10).map(angle =>
+          <OutlinedText
+              key={angle}
+              transform={`rotate(${90 - angle} 0,0)`}
+              className={classes.azimuthText}
+              x={0}
+              y={paperRadius - tertiarySpacing}
+              fontSize={azimuthTextSize}
+          >
+            {angle.toFixed(0)}
+          </OutlinedText>
+        )}
+      </g>
+      {/* azimuths 190 - 360 */}
+      <g>
+        {range(190, 360, 10).map(angle =>
+          <OutlinedText
+              key={angle}
+              transform={`rotate(${270 - angle} 0,0)`}
+              className={classes.azimuthText}
+              x={0}
+              y={paperRadius - tertiarySpacing - minorSpacing}
+              fontSize={azimuthTextSize}
+          >
+            {angle.toFixed(0)}
+          </OutlinedText>
+        )}
+      </g>
+      {/* outline */}
       <path
           d={`M ${-paperRadius} 0 A ${paperRadius} ${paperRadius} 0 0 0 ${paperRadius} 0 Z`}
           stroke="black"
