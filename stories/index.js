@@ -19,6 +19,20 @@ storiesOf('TherionProtractor', module)
         }}
     />
   ))
+  .add('1" = 10, radius = 30', () => (
+    <TherionProtractor
+        unit="in"
+        scale={10}
+        radius={30}
+        minTickSpacing={0.1}
+        strokeWidths={{
+          major: 0.03,
+          minor: 0.01,
+          tertiary: 0.005,
+          quaternary: 0.002,
+        }}
+    />
+  ))
   .add('1" = 10, radius = 40', () => (
     <TherionProtractor
         unit="in"
