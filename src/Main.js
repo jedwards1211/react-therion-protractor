@@ -1,5 +1,5 @@
 // @flow
-/* global window */
+/* eslint-env browser */
 
 import React from 'react'
 import injectSheet from 'react-jss'
@@ -76,10 +76,8 @@ function getProtractorProps({
 }
 
 function print() {
-  if (typeof window !== undefined) {
-    window.frames['preview'].focus()
-    window.frames['preview'].print()
-  }
+  window.frames['preview'].focus()
+  window.frames['preview'].print()
 }
 
 const Main = ({router, location: {pathname, query}, sheet: {classes}}: Props): React.Element<any> => {
@@ -124,7 +122,7 @@ const Main = ({router, location: {pathname, query}, sheet: {classes}}: Props): R
           id="preview"
           name="preview"
           className={classes.preview}
-          src={`/#/preview/?${convertQuery(protractorProps)}`}
+          src={`${window.location.protocol}//${window.location.host}${window.location.pathname}#/preview/?${convertQuery(protractorProps)}`}
           width="100%"
           height="100%"
           style={{
