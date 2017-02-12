@@ -4,7 +4,7 @@ import React from 'react'
 import injectSheet from 'react-jss'
 import range from 'lodash.range'
 
-import {niceCeiling, largerNiceIncrement, modFloor} from './GridMath'
+import {niceCeiling, largerNiceIncrement, smallerNiceIncrement, modFloor} from './GridMath'
 
 type OutlinedTextProps = {
   transform?: string,
@@ -54,18 +54,20 @@ export type InputProps = {
    * The unit for protractor sizing (not the length unit being used to survey the cave)
    */
   unit: 'in' | 'cm',
-  angleUnit: 'deg' | 'grad',
+  angleUnit?: 'deg' | 'grad',
   paperScale: number,
   worldScale: number,
-  minTertiaryTickSpacing: number,
-  minMinorTickSpacing: number,
+  minTertiaryTickSpacing?: number,
+  minMinorTickSpacing?: number,
   radius: number,
-  strokeWidths: {
-    major: number,
-    minor: number,
-    tertiary: number,
-    quaternary: number,
-  },
+  majorStrokeWidth?: number,
+  minorStrokeWidth?: number,
+  tertiaryStrokeWidth?: number,
+  quaternaryStrokeWidth?: number,
+  azimuthTextSizeAdjustment?: number,
+  inclinationTextSizeAdjustment?: number,
+  majorLengthTextSizeAdjustment?: number,
+  minorLengthTextSizeAdjustment?: number,
 }
 
 export type Props = InputProps & {
@@ -79,20 +81,30 @@ export type Props = InputProps & {
 }
 
 const TherionProtractor = ({
-  unit, angleUnit, paperScale, worldScale, minMinorTickSpacing, minTertiaryTickSpacing, radius, sheet: {classes}, strokeWidths,
+  unit, angleUnit, paperScale, worldScale, minMinorTickSpacing, minTertiaryTickSpacing, radius, sheet: {classes},
+  azimuthTextSizeAdjustment, inclinationTextSizeAdjustment, majorLengthTextSizeAdjustment, minorLengthTextSizeAdjustment,
+  majorStrokeWidth, minorStrokeWidth, tertiaryStrokeWidth, quaternaryStrokeWidth,
 }: Props): React.Element<any> => {
+  if (!angleUnit) angleUnit = 'deg'
+  if (!minMinorTickSpacing) minMinorTickSpacing = 0.15 * (unit === 'cm' ? 2.54 : 1)
+  if (!minTertiaryTickSpacing) minTertiaryTickSpacing = minMinorTickSpacing / 2.1
+  if (!majorStrokeWidth) majorStrokeWidth = 0.012 * (unit === 'cm' ? 2.54 : 1)
+  if (!minorStrokeWidth) minorStrokeWidth = majorStrokeWidth / 3
+  if (!tertiaryStrokeWidth) tertiaryStrokeWidth = minorStrokeWidth / 2
+  if (!quaternaryStrokeWidth) quaternaryStrokeWidth = tertiaryStrokeWidth * 2 / 5
+
   const paperRadius = radius * paperScale / worldScale
-  const height = paperRadius + strokeWidths.minor
-  const tertiaryIncrement = niceCeiling(minTertiaryTickSpacing * worldScale / paperScale)
-  const tertiarySpacing = tertiaryIncrement * paperScale / worldScale
+  const height = paperRadius + minorStrokeWidth
   const minorIncrement = niceCeiling(minMinorTickSpacing * worldScale / paperScale)
   const minorSpacing = minorIncrement * paperScale / worldScale
+  const tertiaryIncrement = smallerNiceIncrement(minorIncrement, minTertiaryTickSpacing * worldScale / paperScale)
+  const tertiarySpacing = tertiaryIncrement * paperScale / worldScale
   const majorIncrement = largerNiceIncrement(minorIncrement)
   const majorSpacing = majorIncrement * paperScale / worldScale
-  const majorLengthTextSize = Math.min(minorSpacing, paperRadius * 0.06)
-  const minorLengthTextSize = Math.min(minorSpacing * 0.6, majorLengthTextSize * 0.8)
-  const azimuthTextSize = Math.min(minorSpacing * 0.8, paperRadius * 0.06)
-  const inclinationTextSize = Math.min(minorSpacing * 0.6, paperRadius * 0.045)
+  const majorLengthTextSize = Math.min(minorSpacing, paperRadius * 0.06) * (majorLengthTextSizeAdjustment || 1)
+  const minorLengthTextSize = Math.min(minorSpacing * 0.6, majorLengthTextSize * 0.8) * (minorLengthTextSizeAdjustment || 1)
+  const azimuthTextSize = Math.min(minorSpacing * 0.8, paperRadius * 0.06) * (azimuthTextSizeAdjustment || 1)
+  const inclinationTextSize = Math.min(minorSpacing * 0.6, paperRadius * 0.045) * (inclinationTextSizeAdjustment || 1)
   const inclinationLabelRadius = Math.min(modFloor(paperRadius / 2, majorSpacing) + majorSpacing / 2, paperRadius - minorSpacing * 3.5)
 
   const smallestTickSize = minorSpacing / 4
@@ -111,8 +123,8 @@ const TherionProtractor = ({
   return (
     <svg
         width={`${height * 2}${unit}`}
-        height={`${height + strokeWidths.minor}${unit}`}
-        viewBox={`${-height} 0 ${height * 2} ${height + strokeWidths.minor}`}
+        height={`${height + minorStrokeWidth}${unit}`}
+        viewBox={`${-height} 0 ${height * 2} ${height + minorStrokeWidth}`}
         preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -135,28 +147,26 @@ const TherionProtractor = ({
       <path
           d={`M 0 0 L 0 ${paperRadius}`}
           stroke="black"
-          strokeWidth={strokeWidths.tertiary}
+          strokeWidth={tertiaryStrokeWidth}
           fill="none"
       />
       {/* tertiary verticals */}
-      {/*
       <path
-        d={range(tertiarySpacing, paperRadius, tertiarySpacing).map(
+          d={range(tertiarySpacing, paperRadius, tertiarySpacing).map(
             radius => `M ${-radius} 0 L ${-radius} ${paperRadius} M ${radius} 0 L ${radius} ${paperRadius}`
           ).join(' ')}
-        stroke="black"
-        strokeWidth={strokeWidths.quaternary}
-        fill="none"
-        clipPath="url(#outline)"
+          stroke="black"
+          strokeWidth={quaternaryStrokeWidth}
+          fill="none"
+          clipPath="url(#outline)"
       />
-      */}
       {/* tertiary length ticks */}
       <path
           d={range(tertiarySpacing, paperRadius, tertiarySpacing).map(
             radius => `M ${-radius} 0 L ${-radius} ${smallestTickSize} M ${radius} 0 L ${radius} ${smallestTickSize}`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.tertiary}
+          strokeWidth={tertiaryStrokeWidth}
           fill="none"
           clipPath="url(#outline)"
       />
@@ -166,7 +176,7 @@ const TherionProtractor = ({
             radius => `M ${-radius} 0 L ${-radius} ${paperRadius} M ${radius} 0 L ${radius} ${paperRadius}`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.tertiary}
+          strokeWidth={tertiaryStrokeWidth}
           fill="none"
           clipPath="url(#outline)"
       />
@@ -176,7 +186,7 @@ const TherionProtractor = ({
             radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 0 ${radius} 0`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.minor}
+          strokeWidth={minorStrokeWidth}
           fill="none"
       />
       {/* major arcs */}
@@ -185,7 +195,7 @@ const TherionProtractor = ({
             radius => `M ${-radius} 0 A ${radius} ${radius} 0 0 0 ${radius} 0`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.major}
+          strokeWidth={majorStrokeWidth}
           fill="none"
       />
       {/* 1-degree ticks */}
@@ -197,7 +207,7 @@ const TherionProtractor = ({
             return `M ${ir * c} ${ir * s} L ${paperRadius * c} ${paperRadius * s}`
           }).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.tertiary}
+          strokeWidth={tertiaryStrokeWidth}
           fill="none"
           clipPath="url(#spoke-clip)"
       />
@@ -210,7 +220,7 @@ const TherionProtractor = ({
             return `M ${ir * c} ${ir * s} L ${paperRadius * c} ${paperRadius * s}`
           }).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.minor}
+          strokeWidth={minorStrokeWidth}
           fill="none"
           clipPath="url(#spoke-clip)"
       />
@@ -220,7 +230,7 @@ const TherionProtractor = ({
             angle => `M 0 0 L ${paperRadius * cos(angle)} ${paperRadius * sin(angle)}`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.minor}
+          strokeWidth={minorStrokeWidth}
           fill="none"
           clipPath="url(#spoke-clip)"
       />
@@ -230,7 +240,7 @@ const TherionProtractor = ({
             angle => `M 0 0 L ${paperRadius * cos(angle)} ${paperRadius * sin(angle)}`
           ).join(' ')}
           stroke="black"
-          strokeWidth={strokeWidths.major}
+          strokeWidth={majorStrokeWidth}
           fill="none"
           clipPath="url(#spoke-clip)"
       />
@@ -354,7 +364,7 @@ const TherionProtractor = ({
       <path
           d={`M ${-paperRadius} 0 A ${paperRadius} ${paperRadius} 0 0 0 ${paperRadius} 0 Z`}
           stroke="black"
-          strokeWidth={strokeWidths.minor}
+          strokeWidth={minorStrokeWidth}
           fill="none"
       />
     </svg>

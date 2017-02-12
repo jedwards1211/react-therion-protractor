@@ -1,7 +1,7 @@
 // @flow
 
 /**
- * @return a value >= x and < x * 10 that divides evenly into a power of 10.
+ * @return a value >= x and < x * 10 that divides evenly into 2 * a power of 10.
  */
 export function niceCeiling(x: number): number {
   var floor = Math.pow(10, Math.floor(Math.log10(x)))
@@ -11,8 +11,11 @@ export function niceCeiling(x: number): number {
   if (floor * 2 >= x) {
     return floor * 2
   }
-  if (floor * 2.5 >= x) {
+  if (floor !== 1 && floor * 2.5 >= x) {
     return floor * 2.5
+  }
+  if (floor * 4 >= x) {
+    return floor * 4
   }
   if (floor * 5 >= x) {
     return floor * 5
@@ -45,6 +48,21 @@ export function largerNiceIncrement(increment: number): number {
     return floor * 20
   }
   return floor * 50
+}
+
+export function smallerNiceIncrement(increment: number, minIncrement: number): number {
+  let floor = Math.pow(10, Math.floor(Math.log10(increment)))
+  let factor = increment / floor
+  if (factor < 1.5) {
+    floor *= 10
+    factor *= 10
+  }
+  // 5eX -> 1eX
+  if (factor > 4.5) return floor >= minIncrement ? floor : NaN
+  // 4eX -> 2eX or 1eX
+  if (factor > 3) return floor >= minIncrement ? floor : floor * 2 >= minIncrement ? floor * 2 : NaN
+  // 2eX -> 1eX
+  return floor >= minIncrement ? floor : NaN
 }
 
 /**

@@ -1,7 +1,9 @@
 /* @flow */
+/* eslint-env browser */
 
 import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './App'
 
-const Hello = () => <div>Hello world!</div>
+ReactDOM.render(<App />, document.getElementById('root'))
 
-export default Hello

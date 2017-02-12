@@ -16,12 +16,6 @@ describe('TherionProtractor', () => {
           minMinorTickSpacing={0.2}
           unit="in"
           radius={40}
-          strokeWidths={{
-            major: 0.3,
-            minor: 0.125,
-            tertiary: 0.05,
-            quaternary: 0.02,
-          }}
       />
     )
 

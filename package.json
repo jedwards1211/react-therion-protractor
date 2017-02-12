@@ -4,6 +4,7 @@
   "description": "customizable SVG therion protractor in React",
   "main": "lib/index.js",
   "scripts": {
+    "start": "webpack-dev-server --open --progress --devtool eval",
     "lint": "eslint src test stories",
     "lint:fix": "eslint --fix src test stories",
     "lint:watch": "esw --watch src test stories",
@@ -12,7 +13,7 @@
     "flow:watch": "flow-watch -e js,js.flow,flowconfig --ignore lib/ --ignore node_modules/ --watch .flowconfig --watch src/ --watch test/",
     "gen-flow-files": "flow gen-flow-files src/ --out-dir lib",
     "copy-flow-files": "cd src; copy *.js.flow **/*.js.flow ../lib",
-    "build": "rimraf lib && babel src --out-dir lib",
+    "build": "rimraf lib && babel src --out-dir lib && webpack",
     "test": "NODE_ENV=production BABEL_ENV=test nyc --reporter=lcov --reporter=text mocha $npm_package_config_mocha",
     "commitmsg": "validate-commit-msg",
     "precommit": "npm run lint && flow",
@@ -62,6 +63,7 @@
     "babel-cli": "^6.18.0",
     "babel-core": "^6.21.0",
     "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.2.10",
     "babel-plugin-flow-react-proptypes": "^0.21.0",
     "babel-plugin-istanbul": "^3.1.2",
     "babel-plugin-transform-react-constant-elements": "^6.9.1",
@@ -92,14 +94,22 @@
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-hot-loader": "^3.0.0-beta.2",
+    "react-router": "^3.0.2",
     "rimraf": "^2.5.4",
-    "validate-commit-msg": "^2.8.2"
+    "validate-commit-msg": "^2.8.2",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.3.0"
   },
   "peerDependencies": {
     "react": "0.14.x || ^15.0.0"
   },
   "dependencies": {
+    "classnames": "^2.2.5",
+    "lodash.mapvalues": "^4.6.0",
     "lodash.range": "^3.2.0",
-    "react-jss": "^5.3.0"
+    "material-ui": "^0.16.7",
+    "react-jss": "^5.3.0",
+    "react-router": "^3.0.2",
+    "react-tap-event-plugin": "^2.0.1"
   }
 }

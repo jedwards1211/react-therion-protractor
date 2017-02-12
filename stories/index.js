@@ -3,23 +3,17 @@
 import React from 'react'
 import { storiesOf } from '@kadira/storybook'
 import TherionProtractor from '../src/TherionProtractor'
+import App from '../src/App'
 
 storiesOf('TherionProtractor', module)
-  .add('1" = 20, radius = 40', () => (
+  .add('App', App)
+  .add('1" = 5, radius = 20', () => (
     <TherionProtractor
         unit="in"
         angleUnit="deg"
         paperScale={1}
-        worldScale={20}
-        radius={40}
-        minTertiaryTickSpacing={0.05}
-        minMinorTickSpacing={0.2}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
+        worldScale={5}
+        radius={20}
     />
   ))
   .add('1" = 10, radius = 30', () => (
@@ -29,14 +23,30 @@ storiesOf('TherionProtractor', module)
         paperScale={1}
         worldScale={10}
         radius={30}
-        minTertiaryTickSpacing={0.1}
-        minMinorTickSpacing={0.2}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
+    />
+  ))
+  .add('1" = 20, radius = 40', () => (
+    <TherionProtractor
+        unit="in"
+        paperScale={1}
+        worldScale={20}
+        radius={40}
+    />
+  ))
+  .add('1" = 25, radius = 50', () => (
+    <TherionProtractor
+        unit="in"
+        paperScale={1}
+        worldScale={25}
+        radius={50}
+    />
+  ))
+  .add('1" = 40, radius = 80', () => (
+    <TherionProtractor
+        unit="in"
+        paperScale={1}
+        worldScale={40}
+        radius={80}
     />
   ))
   .add('1" = 10, radius = 30, grad', () => (
@@ -46,14 +56,6 @@ storiesOf('TherionProtractor', module)
         paperScale={1}
         worldScale={10}
         radius={30}
-        minTertiaryTickSpacing={0.1}
-        minMinorTickSpacing={0.2}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
     />
   ))
   .add('2cm = 10, radius = 30', () => (
@@ -63,14 +65,6 @@ storiesOf('TherionProtractor', module)
         paperScale={2}
         worldScale={10}
         radius={30}
-        minTertiaryTickSpacing={0.15}
-        minMinorTickSpacing={0.3}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
     />
   ))
   .add('2cm = 5, radius = 20', () => (
@@ -80,14 +74,6 @@ storiesOf('TherionProtractor', module)
         paperScale={2}
         worldScale={5}
         radius={20}
-        minTertiaryTickSpacing={0.15}
-        minMinorTickSpacing={0.3}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
     />
   ))
   .add('2cm = 15, radius = 45', () => (
@@ -97,14 +83,6 @@ storiesOf('TherionProtractor', module)
         paperScale={2}
         worldScale={15}
         radius={45}
-        minTertiaryTickSpacing={0.1}
-        minMinorTickSpacing={0.4}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
     />
   ))
   .add('1" = 10, radius = 40', () => (
@@ -114,14 +92,6 @@ storiesOf('TherionProtractor', module)
         paperScale={1}
         worldScale={10}
         radius={40}
-        minTertiaryTickSpacing={0.1}
-        minMinorTickSpacing={0.2}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
     />
   ))
   .add('1" = 10, radius = 35', () => (
@@ -131,14 +101,6 @@ storiesOf('TherionProtractor', module)
         paperScale={1}
         worldScale={10}
         radius={35}
-        minTertiaryTickSpacing={0.1}
-        minMinorTickSpacing={0.2}
-        strokeWidths={{
-          major: 0.03,
-          minor: 0.01,
-          tertiary: 0.005,
-          quaternary: 0.002,
-        }}
     />
   ))
 
