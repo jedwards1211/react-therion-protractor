@@ -10,7 +10,6 @@ import IconButton from 'material-ui/IconButton'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import Print from 'material-ui/svg-icons/action/print'
-import type {Props as ProtractorProps} from './TherionProtractorMenu'
 
 const styles = {
   root: {
@@ -49,88 +48,86 @@ function convertQuery(query: Object): string {
   return result.join('&')
 }
 
-function getProtractorProps({
-  unit,
-  angleUnit,
-  paperScale,
-  worldScale,
-  minTertiaryTickSpacing,
-  minMinorTickSpacing,
-  radius,
-  majorStrokeWidth,
-  minorStrokeWidth,
-  tertiaryStrokeWidth,
-  quaternaryStrokeWidth,
-  azimuthTextSizeAdjustment,
-  inclinationTextSizeAdjustment,
-  majorLengthTextSizeAdjustment,
-  minorLengthTextSizeAdjustment,
-}: Object): ProtractorProps {
-  return {
-    unit: unit || 'in',
-    angleUnit: angleUnit || 'deg',
-    paperScale: parseFloat(paperScale) || 1,
-    worldScale: parseFloat(worldScale) || 10,
-    radius: parseFloat(radius) || 20,
-  }
-}
-
 function print() {
   window.frames['preview'].focus()
   window.frames['preview'].print()
 }
 
-const Main = ({router, location: {pathname, query}, sheet: {classes}}: Props): React.Element<any> => {
-  const menuOpen = query.showMenu === 'true'
-  const protractorProps = getProtractorProps(query)
+class Main extends React.Component<void, Props, void> {
+  setDefaults({router, location: {pathname, query}}: Props) {
+    const defaults = {}
+    if (!query.unit) defaults.unit = 'in'
+    if (!query.angleUnit) defaults.angleUnit = 'deg'
+    if (!query.showLengthLabels) defaults.showLengthLabels = 'true'
+    if (query.paperScale == null) defaults.paperScale = '1'
+    if (query.worldScale == null) defaults.worldScale = '10'
+    if (query.radius == null) defaults.radius = '20'
+    if (query.tileX == null) defaults.tileX = '1'
+    if (query.tileY == null) defaults.tileY = '1'
 
-  return (
-    <div className={classes.root}>
-      <AppBar
-          title="Customizable Therion Protractor"
-          iconElementLeft={
+    if (Object.keys(defaults).length) router.replace({pathname, query: {...query, ...defaults}})
+  }
+
+  componentWillMount() {
+    this.setDefaults(this.props)
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    this.setDefaults(nextProps)
+  }
+
+  render(): React.Element<any> {
+    const {router, location: {pathname, query}, sheet: {classes}} = this.props
+    const menuOpen = query.showMenu === 'true'
+
+    return (
+      <div className={classes.root}>
+        <AppBar
+            title="Customizable Therion Protractor"
+            iconElementLeft={
             <IconButton onClick={() => router.push({pathname, query: {...query, showMenu: true}})}>
               <NavigationMenu />
             </IconButton>
           }
-          iconElementRight={
-            <IconButton onClick={print}>
-              <Print />
-            </IconButton>
-          }
-      />
-      <Drawer open={menuOpen}>
-        <AppBar
-            title="Options"
-            iconElementLeft={
-              <IconButton onClick={() => router.push({pathname, query: {...query, showMenu: false}})}>
-                <NavigationClose />
-              </IconButton>
-            }
             iconElementRight={
             <IconButton onClick={print}>
               <Print />
             </IconButton>
           }
         />
-        <TherionProtractorMenu
-            {...protractorProps}
-            onChange={(prop: string, newValue: any) => router.push({pathname, query: {...query, [prop]: newValue}})}
+        <Drawer open={menuOpen}>
+          <AppBar
+              title="Options"
+              iconElementLeft={
+              <IconButton onClick={() => router.push({pathname, query: {...query, showMenu: false}})}>
+                <NavigationClose />
+              </IconButton>
+            }
+              iconElementRight={
+            <IconButton onClick={print}>
+              <Print />
+            </IconButton>
+          }
+          />
+          <TherionProtractorMenu
+              {...query}
+              onChange={(prop: string, newValue: any) => router.push({pathname, query: {...query, [prop]: newValue}})}
+          />
+        </Drawer>
+        <iframe
+            id="preview"
+            name="preview"
+            className={classes.preview}
+            src={`${window.location.protocol}//${window.location.host}${window.location.pathname}#/preview/?${convertQuery(query)}`}
+            width="100%"
+            height="100%"
+            style={{
+              marginLeft: menuOpen ? 256 : 0,
+            }}
         />
-      </Drawer>
-      <iframe
-          id="preview"
-          name="preview"
-          className={classes.preview}
-          src={`${window.location.protocol}//${window.location.host}${window.location.pathname}#/preview/?${convertQuery(protractorProps)}`}
-          width="100%"
-          height="100%"
-          style={{
-            marginLeft: menuOpen ? 256 : 0,
-          }}
-      />
-    </div>
-  )
+      </div>
+    )
+  }
 }
 
 export default injectSheet(styles)(Main)

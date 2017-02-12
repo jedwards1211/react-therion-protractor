@@ -4,7 +4,7 @@
   "description": "customizable SVG therion protractor in React",
   "main": "lib/index.js",
   "scripts": {
-    "start": "webpack-dev-server --open --progress --devtool eval",
+    "start": "webpack-dev-server --host 0.0.0.0 --open --progress --devtool eval",
     "lint": "eslint src test stories",
     "lint:fix": "eslint --fix src test stories",
     "lint:watch": "esw --watch src test stories",

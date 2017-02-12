@@ -4,30 +4,34 @@ import React from 'react'
 import FlatButton from 'material-ui/FlatButton'
 import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
+import Toggle from 'material-ui/Toggle'
 
 export type Props = {
   unit?: 'in' | 'cm',
   angleUnit?: 'deg' | 'grad',
-  paperScale?: number,
-  worldScale?: number,
-  minTertiaryTickSpacing?: number,
-  minMinorTickSpacing?: number,
-  radius?: number,
-  majorStrokeWidth?: number,
-  minorStrokeWidth?: number,
-  tertiaryStrokeWidth?: number,
-  quaternaryStrokeWidth?: number,
-  azimuthTextSizeAdjustment?: number,
-  inclinationTextSizeAdjustment?: number,
-  majorLengthTextSizeAdjustment?: number,
-  minorLengthTextSizeAdjustment?: number,
+  paperScale?: string,
+  worldScale?: string,
+  minTertiaryTickSpacing?: string,
+  minMinorTickSpacing?: string,
+  radius?: string,
+  majorStrokeWidth?: string,
+  minorStrokeWidth?: string,
+  tertiaryStrokeWidth?: string,
+  quaternaryStrokeWidth?: string,
+  azimuthTextSizeAdjustment?: string,
+  inclinationTextSizeAdjustment?: string,
+  majorLengthTextSizeAdjustment?: string,
+  minorLengthTextSizeAdjustment?: string,
+  showLengthLabels?: string,
+  tileX?: string,
+  tileY?: string,
   onChange?: (prop: string, newValue: any) => any,
 }
 
 export const sectionStyle = {margin: 8}
 
 const TherionProtractorMenu = (props: Props): React.Element<any> => {
-  const {unit, angleUnit, paperScale, worldScale, radius} = props
+  const {unit, angleUnit, paperScale, worldScale, radius, tileX, tileY, showLengthLabels} = props
   const onChange = props.onChange || (() => {})
   return (
     <div>
@@ -53,11 +57,27 @@ const TherionProtractorMenu = (props: Props): React.Element<any> => {
         />
       </div>
       <div style={sectionStyle}>
+        <Toggle label="Length labels" toggled={showLengthLabels !== 'false'}
+                onToggle={(e, checked) => onChange('showLengthLabels', String(checked))}
+        />
+      </div>
+      <div style={sectionStyle}>
         Radius: <TextField value={radius} onChange={e => onChange('radius', e.target.value)}
             name="radius"
             style={{width: 80}}
             inputStyle={{textAlign: 'center'}}
                 />
+      </div>
+      <div style={sectionStyle}>
+        Tiling: <TextField value={tileX} onChange={e => onChange('tileX', e.target.value)}
+            name="tileX"
+            style={{width: 40}}
+            inputStyle={{textAlign: 'center'}}
+                /> by <TextField value={tileY} onChange={e => onChange('tileY', e.target.value)}
+                    name="tileY"
+                    style={{width: 40}}
+                    inputStyle={{textAlign: 'center'}}
+                      />
       </div>
     </div>
   )
