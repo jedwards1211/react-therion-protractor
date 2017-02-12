@@ -11,11 +11,14 @@ describe('TherionProtractor', () => {
   it('sizes itself correctly', () => {
     const comp = mount(
       <TherionProtractor
-          scale={20}
-          minTertiaryTickSpacing={0.1}
-          minMinorTickSpacing={0.2}
+          paperScale={1}
           unit="in"
+          worldScale={20}
           radius={40}
+          majorStrokeWidth={0.3}
+          minorStrokeWidth={0.125}
+          tertiaryStrokeWidth={0.05}
+          quaternaryStrokeWidth={0.02}
       />
     )
 
