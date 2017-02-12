@@ -10,7 +10,11 @@ export type Props = {
   },
 }
 
-const Preview = ({location: {query: {tileX, tileY, paperScale, worldScale, radius, showLengthLabels, ...query}}}: Props): React.Element<any> => (
+const Preview = ({location: {query: {
+  tileX, tileY, paperScale, worldScale, radius, showLengthLabels,
+  majorStrokeWidth, minorStrokeWidth, tertiaryStrokeWidth, quaternaryStrokeWidth,
+  ...query
+}}}: Props): React.Element<any> => (
   <table>
     <tbody>
       {range(0, parseInt(tileY)).map(index =>
@@ -23,6 +27,10 @@ const Preview = ({location: {query: {tileX, tileY, paperScale, worldScale, radiu
                   worldScale={parseFloat(worldScale)}
                   radius={parseFloat(radius)}
                   showLengthLabels={showLengthLabels !== 'false'}
+                  majorStrokeWidth={parseFloat(majorStrokeWidth)}
+                  minorStrokeWidth={parseFloat(minorStrokeWidth)}
+                  tertiaryStrokeWidth={parseFloat(tertiaryStrokeWidth)}
+                  quaternaryStrokeWidth={parseFloat(quaternaryStrokeWidth)}
               />
             </td>
           )}

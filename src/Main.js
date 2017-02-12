@@ -65,6 +65,11 @@ class Main extends React.Component<void, Props, void> {
     if (query.tileX == null) defaults.tileX = '1'
     if (query.tileY == null) defaults.tileY = '1'
 
+    if (query.majorStrokeWidth == null) defaults.majorStrokeWidth = 0.012 * ((query.unit || defaults.unit) === 'in' ? 1 : 2.54)
+    if (query.minorStrokeWidth == null) defaults.minorStrokeWidth = (query.majorStrokeWidth || defaults.majorStrokeWidth) / 3
+    if (query.tertiaryStrokeWidth == null) defaults.tertiaryStrokeWidth = (query.minorStrokeWidth || defaults.minorStrokeWidth) / 2
+    if (query.quaternaryStrokeWidth == null) defaults.quaternaryStrokeWidth = (query.tertiaryStrokeWidth || defaults.tertiaryStrokeWidth) / 4
+
     if (Object.keys(defaults).length) router.replace({pathname, query: {...query, ...defaults}})
   }
 
@@ -80,12 +85,14 @@ class Main extends React.Component<void, Props, void> {
     const {router, location: {pathname, query}, sheet: {classes}} = this.props
     const menuOpen = query.showMenu === 'true'
 
+    const previewUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}#/preview/?${convertQuery(query)}`
+
     return (
       <div className={classes.root}>
         <AppBar
             title="Customizable Therion Protractor"
             iconElementLeft={
-            <IconButton onClick={() => router.push({pathname, query: {...query, showMenu: true}})}>
+            <IconButton onClick={() => router.replace({pathname, query: {...query, showMenu: true}})}>
               <NavigationMenu />
             </IconButton>
           }
@@ -99,7 +106,7 @@ class Main extends React.Component<void, Props, void> {
           <AppBar
               title="Options"
               iconElementLeft={
-              <IconButton onClick={() => router.push({pathname, query: {...query, showMenu: false}})}>
+              <IconButton onClick={() => router.replace({pathname, query: {...query, showMenu: false}})}>
                 <NavigationClose />
               </IconButton>
             }
@@ -111,14 +118,15 @@ class Main extends React.Component<void, Props, void> {
           />
           <TherionProtractorMenu
               {...query}
-              onChange={(prop: string, newValue: any) => router.push({pathname, query: {...query, [prop]: newValue}})}
+              onChange={(prop: string, newValue: any) => router.replace({pathname, query: {...query, [prop]: newValue}})}
+              onMultiChange={newProps => router.replace({pathname, query: {...query, ...newProps}})}
           />
         </Drawer>
         <iframe
             id="preview"
             name="preview"
             className={classes.preview}
-            src={`${window.location.protocol}//${window.location.host}${window.location.pathname}#/preview/?${convertQuery(query)}`}
+            src={previewUrl}
             width="100%"
             height="100%"
             style={{
