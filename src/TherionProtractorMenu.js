@@ -5,6 +5,7 @@ import FlatButton from 'material-ui/FlatButton'
 import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import Toggle from 'material-ui/Toggle'
+import Slider from 'material-ui/Slider'
 
 export type Props = {
   unit?: 'in' | 'cm',
@@ -39,8 +40,10 @@ function selectAll(e: any) {
 const TherionProtractorMenu = (props: Props): React.Element<any> => {
   const {unit, angleUnit, paperScale, worldScale, radius, tileX, tileY, showLengthLabels,
     majorStrokeWidth, minorStrokeWidth, tertiaryStrokeWidth, quaternaryStrokeWidth,
+    minMinorTickSpacing,
     onMultiChange,
   } = props
+  const lengthConv = unit === 'in' ? 1 : 2.54
   const onChange = props.onChange || (() => {})
   return (
     <div>
@@ -70,6 +73,7 @@ const TherionProtractorMenu = (props: Props): React.Element<any> => {
               if (parseFloat(minorStrokeWidth)) newProps.minorStrokeWidth = String(parseFloat(minorStrokeWidth) * conv)
               if (parseFloat(tertiaryStrokeWidth)) newProps.tertiaryStrokeWidth = String(parseFloat(tertiaryStrokeWidth) * conv)
               if (parseFloat(quaternaryStrokeWidth)) newProps.quaternaryStrokeWidth = String(parseFloat(quaternaryStrokeWidth) * conv)
+              if (parseFloat(minMinorTickSpacing)) newProps.minMinorTickSpacing = String(parseFloat(minMinorTickSpacing) * conv)
 
               onMultiChange(newProps)
             }}
@@ -97,6 +101,15 @@ const TherionProtractorMenu = (props: Props): React.Element<any> => {
             onFocus={selectAll}
             style={{width: 80}}
             inputStyle={{textAlign: 'center'}}
+        />
+      </div>
+      <div style={sectionStyle}>
+        Tick Spacing:
+        <Slider
+            min={3}
+            max={Math.round(30 * lengthConv)}
+            value={parseFloat(minMinorTickSpacing) * 100}
+            onChange={(e, newValue) => onChange('minMinorTickSpacing', newValue / 100)}
         />
       </div>
       <div style={sectionStyle}>
@@ -136,18 +149,9 @@ const TherionProtractorMenu = (props: Props): React.Element<any> => {
         /> {unit}
       </div>
       <div style={sectionStyle}>
-        {'3ary stroke width: '}
+        {'Tertiary stroke width: '}
         <TextField value={tertiaryStrokeWidth} onChange={e => onChange('tertiaryStrokeWidth', e.target.value)}
             name="tertiaryStrokeWidth"
-            onFocus={selectAll}
-            style={{width: 60}}
-            inputStyle={{textAlign: 'center'}}
-        /> {unit}
-      </div>
-      <div style={sectionStyle}>
-        {'4ary stroke width: '}
-        <TextField value={quaternaryStrokeWidth} onChange={e => onChange('quaternaryStrokeWidth', e.target.value)}
-            name="quaternaryStrokeWidth"
             onFocus={selectAll}
             style={{width: 60}}
             inputStyle={{textAlign: 'center'}}

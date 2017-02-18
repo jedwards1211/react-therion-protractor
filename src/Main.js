@@ -64,11 +64,12 @@ class Main extends React.Component<void, Props, void> {
     if (query.radius == null) defaults.radius = '20'
     if (query.tileX == null) defaults.tileX = '1'
     if (query.tileY == null) defaults.tileY = '1'
+    if (query.minMinorTickSpacing == null) defaults.minMinorTickSpacing = '0.1'
 
-    if (query.majorStrokeWidth == null) defaults.majorStrokeWidth = 0.012 * ((query.unit || defaults.unit) === 'in' ? 1 : 2.54)
-    if (query.minorStrokeWidth == null) defaults.minorStrokeWidth = (query.majorStrokeWidth || defaults.majorStrokeWidth) / 3
-    if (query.tertiaryStrokeWidth == null) defaults.tertiaryStrokeWidth = (query.minorStrokeWidth || defaults.minorStrokeWidth) / 2
-    if (query.quaternaryStrokeWidth == null) defaults.quaternaryStrokeWidth = (query.tertiaryStrokeWidth || defaults.tertiaryStrokeWidth) / 4
+    if (query.majorStrokeWidth == null) defaults.majorStrokeWidth = 0.015 * ((query.unit || defaults.unit) === 'in' ? 1 : 2.54)
+    if (query.minorStrokeWidth == null) defaults.minorStrokeWidth = (query.majorStrokeWidth || defaults.majorStrokeWidth) / 2
+    if (query.tertiaryStrokeWidth == null) defaults.tertiaryStrokeWidth = (query.minorStrokeWidth || defaults.minorStrokeWidth) / 3
+    if (query.quaternaryStrokeWidth == null) defaults.quaternaryStrokeWidth = (query.tertiaryStrokeWidth || defaults.tertiaryStrokeWidth) / 10
 
     if (Object.keys(defaults).length) router.replace({pathname, query: {...query, ...defaults}})
   }
